@@ -1,0 +1,18 @@
+{
+  "pages": [
+    "pages/ble/ble",
+    "pages/start/start",
+    "pages/index/index",
+    "pages/kongzhi/kongzhi",
+    "pages/logs/logs",
+    "pages/bie"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#eee",
+    "navigationBarTitleText": "蓝牙通信",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#eeeeee"
+  },
+  "sitemapLocation": "sitemap.json"
+}

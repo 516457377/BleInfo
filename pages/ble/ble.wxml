@@ -1,0 +1,177 @@
+<!--pages/ble/ble.wxml-->
+<!-- 页面1 -->
+<view id="pager1" style="width:100%; height:100%; background: #63666B" hidden="{{index==0? false: true}}">
+  
+  <!-- 选择-->
+  <view style="width: 100%;height: 80rpx;  line-height: 100rpx; background-color: #30333C; overflow: hidden;  display: table;  table-layout: fixed; color: #000000; ">
+  <text data-id="0" bindtap="auxClick" class="aux-change {{aux_index==0?'focus':'not'}}">默认</text>
+  <text data-id="1" bindtap="auxClick" class="aux-change {{aux_index==1?'focus':'not'}}">AUX</text>
+  </view>
+
+  <!--音量 -->
+  <view style="width:100%;text-align: center; color:#fff;border-radius: 35rpx; border: 1px solid #000;background: #53565B;">
+      <view style="font-size:120%;padding-top:30rpx;" >音量控制</view>
+      <view style="font-size:400%;padding-top:0rpx;" >{{sound}}</view>
+      <view style='margin-top:0rpx; padding: 10px; line-height: 80rpx;  font-size: 35rpx;  color: #fff;'>
+
+          <view style="overflow:hidden" >
+            <slider bindchanging="Soundchangeing" max="28" bindchange="Soundchanged" block-size="40" value="{{sound}}"/>
+          </view>
+      </view>
+   
+  </view>
+
+  <!-- 延时设置-->
+  <view style="width:100%;text-align: center;margin-top:30rpx;">
+    <text style="font-size:120%;padding-top:10rpx;color:#fff;">延时设置</text>
+
+    <view style="height:80rpx;line-height:80rpx;overflow:hidden; padding:0rpx 0rpx 0rpx 20rpx;">
+
+        <text style='width:30%;float: left; color:#fff;font-size:80%;'>前左：{{delay1/10}}ms</text>
+        <view style="overflow:hidden" >
+          <slider id="d1" bindchanging="delayChanging" bindchange='delaychanged' block-size="12" max="100" min="0 "step="1" value="{{delay1}}"/>
+        </view>
+
+    </view>
+    <view style="height:80rpx;line-height:80rpx;overflow:hidden; padding:0rpx 0rpx 0rpx 20rpx;">
+
+        <text style='width:30%;float: left; color:#fff;font-size:80%;'>后左：{{delay2/10}}MS</text>
+        <view style="overflow:hidden" >
+          <slider id="d2" bindchanging="delayChanging" bindchange='delaychanged' block-size="12" max="100" min="0 "step="1" value="{{delay2}}"/>
+        </view>
+
+    </view>
+    <view style="height:80rpx;line-height:80rpx;overflow:hidden; padding:0rpx 20rpx 0rpx 0rpx;">
+
+        <text style='width:30%;float: right; color:#fff;font-size:80%;'>前右：{{delay3/10}}MS</text>
+        <view style="overflow:hidden" >
+          <slider id="d3" bindchanging="delayChanging" bindchange='delaychanged' block-size="12" max="100" min="0 "step="1" value="{{delay3}}"/>
+        </view>
+
+    </view>
+    <view style="height:80rpx;line-height:80rpx;overflow:hidden; padding:0rpx 20rpx 0rpx 0rpx;">
+
+        <text style='width:30%;float: right; color:#fff;font-size:80%;'>后右：{{delay4/10}}MS</text>
+        <view style="overflow:hidden" >
+          <slider id="d4" bindchanging="delayChanging" bindchange='delaychanged' block-size="12" max="100" min="0 "step="1" value="{{delay4}}"/>
+        </view>
+
+    </view>
+
+  </view>
+  <button hidden="true">退出</button>
+
+</view>
+
+
+<!-- 页面2 -->
+<view id="pager2" style="width:100%; height:100%; background: #63666B" hidden="{{index==1? false: true}}">
+  <!-- 顶部-->
+  <view style="padding:40rpx 0rpx 20rpx 0rpx;border-radius: 15rpx; border: 0px solid #000;background: #53565B;">
+
+   <view class='top-4' data-id='0' bindtap='onClickUp' hover-class='ui-share-hover'>
+      <icon class="iconfont {{parTop == 0 ? 'focus' : ''}} icon-top1"></icon>
+      <view style="font-size:80% ;color:{{parTop == 0 ?'#fff':'#BBBBC0'}};">原声</view>
+   </view>
+
+    <view class='top-4' data-id='1' bindtap='onClickUp' hover-class='ui-share-hover'>
+      <icon class="iconfont {{parTop == 1 ? 'focus' : ''}} icon-top2"></icon>
+     <view style="font-size:80%;color:{{parTop == 1 ?'#fff':'#BBBBC0'}};">摇滚</view>
+    </view>
+
+    <view class='top-4' data-id='2' bindtap='onClickUp' hover-class='ui-share-hover'>
+      <icon class="iconfont {{parTop == 2 ? 'focus' : ''}} icon-top3"></icon>
+     <view style="font-size:80%;color:{{parTop == 2 ?'#fff':'#BBBBC0'}};">流行</view>
+   </view>
+
+    <view class='top-4' data-id='3' bindtap='onClickUp' hover-class='ui-share-hover'>
+     <icon class="iconfont {{parTop == 3 ? 'focus' : ''}} icon-top4"></icon>
+     <view style="font-size:80%;color:{{parTop == 3 ?'#fff':'#BBBBC0'}};">爵士</view>
+   </view>
+
+    <view class='top-4' data-id='4' bindtap='onClickUp' hover-class='ui-share-hover'>
+     <icon class="iconfont {{parTop == 4 ? 'focus' : ''}} icon-top5"></icon>
+     <view style="font-size:80%;color:{{parTop == 4 ?'#fff':'#BBBBC0'}};">古典</view>
+    </view>
+
+    <view class='top-4' data-id='5' bindtap='onClickUp' hover-class='ui-share-hover'>
+      <icon class="iconfont {{parTop == 5 ? 'focus' : ''}} icon-top6"></icon>
+      <view style="font-size:80%;color:{{parTop == 5 ?'#fff':'#BBBBC0'}};">用户</view>
+    </view>
+
+  </view>
+
+  <!-- EQ -->
+  <view>
+    <view style="height:110rpx;line-height:110rpx;overflow:hidden; padding:0px 0px 0px 10px;">
+
+        <text style='float: left; color:#fff; padding-top:20rpx; font-size:80%;'>超低</text>
+        <view style="overflow:hidden" >
+          <slider id="eq1" bindchanging="EQchangeing"  min="-12" max="12" show-value="{{true}}" block-size="20" value="{{eq1}}" bindchange='EQchanged' />
+        </view>
+
+    </view>
+    
+    <view style="height:110rpx;line-height:110rpx;overflow:hidden; padding:0px 0px 0px 10px;">
+
+        <text style='float: left; color:#fff; padding-top:20rpx; font-size:80%;'>低音</text>
+        <view style="overflow:hidden" >
+          <slider id="eq2" bindchanging="EQchangeing"  min="-12" max="12" show-value="{{true}}" block-size="20" value="{{eq2}}" bindchange='EQchanged' />
+        </view>
+
+    </view>
+    <view style="height:110rpx;line-height:110rpx;overflow:hidden; padding:0px 0px 0px 10px;">
+
+        <text style='float: left; color:#fff; padding-top:20rpx; font-size:80%;'>中低</text>
+        <view style="overflow:hidden" >
+          <slider id="eq3" bindchanging="EQchangeing"  min="-12" max="12" show-value="{{true}}" block-size="20" value="{{eq3}}" bindchange='EQchanged' />
+        </view>
+
+    </view>
+    <view style="height:110rpx;line-height:110rpx;overflow:hidden; padding:0px 0px 0px 10px;">
+
+        <text style='float: left; color:#fff; padding-top:20rpx; font-size:80%;'>中音</text>
+        <view style="overflow:hidden" >
+          <slider id="eq4" bindchanging="EQchangeing"  min="-12" max="12" show-value="{{true}}" block-size="20" value="{{eq4}}" bindchange='EQchanged' />
+        </view>
+
+    </view>
+    <view style="height:110rpx;line-height:110rpx;overflow:hidden; padding:0px 0px 0px 10px;">
+
+        <text style='float: left; color:#fff; padding-top:20rpx; font-size:80%;'>中高</text>
+        <view style="overflow:hidden" >
+          <slider id="eq5" bindchanging="EQchangeing"  min="-12" max="12" show-value="{{true}}" block-size="20" value="{{eq5}}" bindchange='EQchanged' />
+        </view>
+
+    </view>
+    <view style="height:110rpx;line-height:110rpx;overflow:hidden; padding:0px 0px 0px 10px;">
+
+        <text style='float: left; color:#fff; padding-top:20rpx; font-size:80%;'>高音</text>
+        <view style="overflow:hidden" >
+          <slider id="eq6" bindchanging="EQchangeing"  min="-12" max="12" show-value="{{true}}" block-size="20" value="{{eq6}}" bindchange='EQchanged' />
+        </view>
+
+    </view>
+    <view style="height:110rpx;line-height:110rpx;overflow:hidden; padding:0px 0px 20px 10px;">
+
+        <text style='float: left; color:#fff; padding-top:20rpx; font-size:80%;'>超高</text>
+        <view style="overflow:hidden" >
+          <slider id="eq7" bindchanging="EQchangeing"  min="-12" max="12" show-value="{{true}}" block-size="20" value="{{eq7}}" bindchange='change' />
+        </view>
+
+    </view>
+    <button style="width: 90%;background-color: #555;color: #FFF;" bindtap="onReset" hover-class="ui-click-hover">重置</button>
+
+  </view>
+
+</view>
+
+
+
+<!-- 底部状态栏-->
+<view style="width: 100%;height: 100rpx;  line-height: 100rpx; background-color: #30333C; position: fixed;  bottom: 0;overflow: hidden;  display: table;  table-layout: fixed;  color: #000000; ">
+
+    <text data-id="0" bindtap="changeTabbar" class="tui-tabbar-cell {{index == 0 ? 'tui-active' : ''}}">喇叭控制</text>
+    <text data-id="1" bindtap="changeTabbar" class="tui-tabbar-cell {{index == 1 ? 'tui-active' : ''}}"style="color: #fff;">EQ</text>
+
+</view>

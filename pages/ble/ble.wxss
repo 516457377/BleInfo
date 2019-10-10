@@ -1,0 +1,73 @@
+/* pages/ble/ble.wxss */
+ page {
+  background-color: #63666B;
+  height: 100%;
+}.tui-tabbar-cell{
+  display: table-cell;
+  width: 100%;
+  height: 100rpx;
+  line-height: 100rpx;
+  font-size: 35rpx;
+  text-align: center;
+}
+.tui-tabbar-cell:not(:last-child){border-right: 1px solid #4da4dd;color: #fff;}
+.tui-tabbar-cell.tui-active{background-color: #4da4dd;color: #fff;}
+
+.top-4{
+  display: inline-block;
+  width: 16.6%;
+  text-align: center;
+}
+
+.aux-change{
+  display: table-cell;
+  width: 100%;
+  height: 80rpx;
+  line-height: 80rpx;
+  font-size: 35rpx;
+  text-align: center;
+}
+.aux-change.not{
+border-right: 1px solid #4da4dd;color: #fff;
+}
+.aux-change.focus{
+background-color: #4da4dd;color: #fff;
+}
+.ui-click-hover{
+   opacity: 0.9;
+   background-color: rgb(160, 122, 122);
+   transform: scale(0.9,0.9);
+ }
+
+
+
+
+@font-face {
+  font-family: 'iconfont';  /* project id 1449427 */
+  src: url('//at.alicdn.com/t/font_1449427_ncls2f27zek.eot');
+  src: url('//at.alicdn.com/t/font_1449427_ncls2f27zek.eot?#iefix') format('embedded-opentype'),
+  url('//at.alicdn.com/t/font_1449427_ncls2f27zek.woff2') format('woff2'),
+  url('//at.alicdn.com/t/font_1449427_ncls2f27zek.woff') format('woff'),
+  url('//at.alicdn.com/t/font_1449427_ncls2f27zek.ttf') format('truetype'),
+  url('//at.alicdn.com/t/font_1449427_ncls2f27zek.svg#iconfont') format('svg');
+}
+.iconfont {
+  font-family:"iconfont" !important;
+  font-size:60rpx;
+  font-style:normal;
+  color: rgb(187, 187, 192);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.iconfont:not(:last-child) {
+  color: rgb(187, 187, 192);
+}
+.iconfont.focus{
+  color: rgb(250, 250, 250);
+}
+.icon-top1:before{content: '\e660'}
+.icon-top2:before{content: '\e680'}
+.icon-top3:before{content: '\e615'}
+.icon-top4:before{content: '\e60e'}
+.icon-top5:before{content: '\e67f'}
+.icon-top6:before{content: '\e6ba'}
