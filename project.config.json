@@ -13,7 +13,7 @@
 	"compileType": "miniprogram",
 	"libVersion": "2.0.4",
 	"appid": "wx9b6d9b5a100da4d3",
-	"projectname": "BleRemote",
+	"projectname": "bleInfo",
 	"debugOptions": {
 		"hidedInDevtools": []
 	},

@@ -16,7 +16,7 @@ Page({
     }],
     openBle: false,
     UUID_SERVER: '0000fee0-0000-1000-8000-00805f9b34fb',
-    debug: true,
+    debug: false,
     name: '',
     mac: '',
     // ios: false
@@ -94,7 +94,6 @@ Page({
    */
   onReady: function() {},
 
-
   /**
    * 生命周期函数--监听页面显示
    * 每次进入会调用
@@ -107,7 +106,7 @@ Page({
     })
 
     var that = this;
-    if (jump){
+    if (jump) {
       return;
     }
     //延迟0.5秒触发，有可能初始化蓝牙有延迟。
@@ -118,8 +117,8 @@ Page({
         //存在数据直接连接  
         jump = true;
         wx.hideLoading();
-        wx.redirectTo({ 
-          url: '../kongzhi/kongzhi?mac=' + that.data.mac + '&name=' + that.data.name,
+        wx.redirectTo({
+          url: '../ble/ble?mac=' + that.data.mac + '&name=' + that.data.name,
           complete: function() {
             console.log('start结束')
             wx.stopPullDownRefresh();
@@ -146,7 +145,7 @@ Page({
               jump = true;
               wx.hideLoading();
               wx.redirectTo({
-                url: '../kongzhi/kongzhi?mac=' + that.data.mac + '&name=' + that.data.name,
+                url: '../ble/ble?mac=' + that.data.mac + '&name=' + that.data.name,
                 complete: function() {
                   console.log('start结束')
                   wx.stopPullDownRefresh();
@@ -213,7 +212,8 @@ Page({
                   for (var i = 0; i < res.devices.length; i++) {
                     var ds = that.data.mList
                     if (res.devices[i].localName.indexOf('t') == -1 &&
-                      res.devices[i].localName.indexOf('BLE') == -1) { //过滤不符合蓝牙
+                      res.devices[i].localName.indexOf('BLE') == -1 &&
+                      res.devices[i].localName.length() <= 7) { //过滤不符合蓝牙
                       continue;
                     }
                     var temp = {
@@ -263,7 +263,7 @@ Page({
                               jump = true;
                               wx.hideLoading();
                               wx.redirectTo({
-                                url: '../kongzhi/kongzhi?mac=' + that.data.mList[remeber].mac + '&name=' + that.data.mList[remeber].name,
+                                url: '../ble/ble?mac=' + that.data.mList[remeber].mac + '&name=' + that.data.mList[remeber].name,
                                 complete: function() {
 
                                   return;
@@ -347,7 +347,7 @@ Page({
     jump = true;
     wx.hideLoading();
     wx.redirectTo({
-      url: '../kongzhi/kongzhi?mac=' + res.currentTarget.dataset.mac + '&name=' + res.currentTarget.dataset.name,
+      url: '../ble/ble?mac=' + res.currentTarget.dataset.mac + '&name=' + res.currentTarget.dataset.name,
       complete: function() {
         console.log('start结束')
       }
@@ -383,37 +383,6 @@ Page({
           return;
         }
 
-
-        // if (mac.length > 1 && name.length > 1) {
-        //   if (that.data.ios) {
-        //     //如果是ios则通过名字连接，先扫描设备识别名字连接
-        //     that.connectForName(name)
-        //   } else {
-        //     console.log('扫码跳转:', name, mac)
-        //     wx.redirectTo({
-        //       url: '../kongzhi/kongzhi?mac=' + mac + '&name=' + name,
-        //       complete: function() {
-        //         console.log('start结束')
-        //       }
-        //     })
-        //   }
-        // } else {
-        //   console.log('不跳转')
-
-        //   wx.showToast({
-        //     title: '二维码识别失败\n请扫描正确二维码',
-        //     duration: 3000,
-        //     icon: 'none'
-        //     // image:'../../src/images/warning.png'
-        //   })
-        //   return;
-        // }
-
-
-
-        // that.setData({
-        //   url:res.result
-        // })
       },
       fail: function(res) {
         console.log(res.result, '扫码失败')
@@ -435,10 +404,10 @@ Page({
           if (res.devices[i].name.indexOf(name) > -1 || res.devices[i].localName.indexOf(name) > -1) {
             if (!jump) {
               jump = true;
-              
+
               wx.hideLoading();
               wx.redirectTo({
-                url: '../kongzhi/kongzhi?mac=' + res.devices[i].deviceId + '&name=' + res.devices[i].localName,
+                url: '../ble/ble?mac=' + res.devices[i].deviceId + '&name=' + res.devices[i].localName,
                 complete: function() {
                   console.log('start结束')
                   wx.stopPullDownRefresh();

@@ -2,11 +2,11 @@
 
 <button bindtap='onClick' type='primary' disabled='{{!openBle}}' hidden="{{true}}">扫码连接</button>
 
-<view style='width: 100%;border-bottom: 1px solid #eee;margin-top: 5px;padding-bottom: 5px;padding-left: 20px;' wx:for="{{mList}}" bindtap='onItemClick' wx:key='*this' data-name='{{item.name}}' data-mac='{{item.mac}}' disabled='{{!openBle}}'>
+<view style='color:#fff;width: 100%;border-bottom: 1px solid #555;margin-top: 5rpx;padding-bottom: 5rpx;padding-left: 20px;' wx:for="{{mList}}" bindtap='onItemClick' wx:key='*this' data-name='{{item.name}}' data-mac='{{item.mac}}' disabled='{{!openBle}}'>
   <view >{{item.name}}</view>
   <view >{{item.mac}}</view>
 </view>
-<button bindtap='onRefresh' disabled='{{!openBle}}'>刷新设备</button>
+<button style="width: 90%;margin-top:10rpx;" bindtap='onRefresh' disabled='{{!openBle}}'>刷新设备</button>
 
 <button class="kf_button" open-type="contact" session-from="weapp" hidden='true'>
     <image class="kf_image" src="../../src/images/warning.png"></image>
