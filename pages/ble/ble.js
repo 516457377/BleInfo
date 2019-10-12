@@ -11,7 +11,7 @@ Page({
     /**
      * 调试模式
      * */
-    debug: false,
+    debug: __wxConfig.envVersion == "develop" ? true : false,
     index: 0, //页面选择
     parTop: 0, //eq模式
     windowHeight: 0,
@@ -47,6 +47,8 @@ Page({
     mac = options.mac;
     name = options.name;
     console.log('跳转控制页面', mac, name);
+    const envVersion = __wxConfig.envVersion;
+    console.log('软件版本', envVersion);
 
     wx.showLoading({
       title: '连接中',
@@ -54,7 +56,6 @@ Page({
     });
 
     that.connectBle();
-
 
   },
 
@@ -204,7 +205,7 @@ Page({
     })
     switch (e.currentTarget.dataset.id) {
       case "0":
-        this.setEq(new Int8Array([0,0,0,0,0,0,0]))
+        this.setEq(new Int8Array([0, 0, 0, 0, 0, 0, 0]))
         this.wirte(this.getByte(new Int8Array([0x07, 0x00])))
         break;
 
@@ -212,7 +213,7 @@ Page({
         this.setEq(new Int8Array([8, 5, 4, 3, 4, 3, 2]))
         this.wirte(this.getByte(new Int8Array([0x07, 0x01])))
         break;
-  
+
       case "2":
         this.setEq(new Int8Array([5, 1, 0, 0, 0, 0, 0]))
         this.wirte(this.getByte(new Int8Array([0x07, 0x02])))
@@ -283,11 +284,12 @@ Page({
         })
         break;
     }
-    this.wirte(this.getByte(new Int8Array([0x0a, this.data.eq1, this.data.eq2, this.data.eq3, this.data.eq4, this.data.eq5, this.data.eq6, this.data.eq7,0,0])))
+    this.wirte(this.getByte(new Int8Array([0x0a, this.data.eq1, this.data.eq2, this.data.eq3, this.data.eq4, this.data.eq5, this.data.eq6, this.data.eq7, 0, 0])))
   },
   onReset(e) {
     console.log("click");
     this.setEq(new Int8Array([0, 0, 0, 0, 0, 0, 0]))
+    this.wirte(this.getByte(new Int8Array([0x0a, 0, 0, 0, 0, 0, 0, 0, 0, 0])))
   },
   onBack(e) {
     console.log('退出');
@@ -445,6 +447,7 @@ Page({
           console.log('###收到消息:', res);
           var v = res.value;
           var array = new Int8Array(v);
+
           // that.setData({
           //   slider: array[0]
           // })
@@ -509,7 +512,7 @@ Page({
     }
     return bs;
   },
-  /**设置EQ值*/
+  /**重设设置EQ值*/
   setEq(eqs) {
     this.setData({
       eq1: eqs[0],
