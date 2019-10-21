@@ -16,7 +16,7 @@ Page({
     parTop: 0, //eq模式
     windowHeight: 0,
     screenHeight: 0,
-    sound: 10, //音量
+    sound: 0, //音量
     aux_index: 0, //aux模式
     delay1: 0, //延时时间
     delay2: 0,
@@ -29,6 +29,7 @@ Page({
     eq5: 0,
     eq6: 0,
     eq7: 0,
+    listen:false,//聆听位
     //-------------------------------
     connect: false, //连接状态
     deviceID: '', //当前连接设备id(MAC)
@@ -77,14 +78,28 @@ Page({
    * 生命周期函数--监听页面隐藏
    */
   onHide: function() {
-
+    // console.log("hind")
   },
 
   /**
    * 生命周期函数--监听页面卸载
    */
   onUnload: function() {
-
+    var that = this;
+    console.log('Unload:退出');
+    wx.closeBLEConnection({
+      deviceId: mac,
+      success: function(res) {
+        console.log('断开链接')
+        that.disConnect();
+      },
+      complete: function(res) {
+        console.log('跳转到搜索页面')
+        wx.reLaunch({
+          url: '../start/start',
+        })
+      }
+    })
   },
 
   /**
@@ -205,36 +220,100 @@ Page({
     })
     switch (e.currentTarget.dataset.id) {
       case "0":
+        // console.log('一级连接:', mac)
+        // wx.createBLEConnection({
+        //   deviceId: mac,
+        //   success: function(res) {
+        //     console.log('一级连接成功')
+        //   },fail:function(res){
+        //     console.log('一级连接失败',res)
+        //   }
+        // })
         this.setEq(new Int8Array([0, 0, 0, 0, 0, 0, 0]))
         this.wirte(this.getByte(new Int8Array([0x07, 0x00])))
         break;
 
       case "1":
+        // console.log('断开一级连接')
+        //   wx.closeBLEConnection({
+        //     deviceId: mac,
+        //     success: function(res) {
+        //       console.log('1断开成功')
+        //     },fail:function(res){
+        //       console.log('1断开失败',res)
+        //     }
+        //   })
         this.setEq(new Int8Array([8, 5, 4, 3, 4, 3, 2]))
         this.wirte(this.getByte(new Int8Array([0x07, 0x01])))
         break;
 
       case "2":
+        // console.log('获取server')
+        //   wx.getBLEDeviceServices({
+        //     deviceId: mac,
+        //     success: function(res) {
+        //       console.log('获取server成功')
+        //     },fail:function(res){
+        //       console.log('获取server失败',res)
+        //     }
+        //   })
         this.setEq(new Int8Array([5, 1, 0, 0, 0, 0, 0]))
         this.wirte(this.getByte(new Int8Array([0x07, 0x02])))
         break;
 
       case "3":
+        // console.log('一级连接错误地址:')
+        // wx.createBLEConnection({
+        //   deviceId: '00000000',
+        //   success: function (res) {
+        //     console.log('一级连接成功')
+        //   }, fail: function (res) {
+        //     console.log('一级连接失败', res)
+        //   }
+        // })
         this.setEq(new Int8Array([6, 4, 3, 4, 5, 3, 2]))
         this.wirte(this.getByte(new Int8Array([0x07, 0x03])))
         break;
 
       case "4":
+        // wx.closeBluetoothAdapter({
+        //   success: function(res) {
+        //     console.log('关闭蓝牙模块成功')
+        //   },fail:function(res){
+        //     console.log('关闭蓝牙模块失败',res)
+        //   }
+        // })
         this.setEq(new Int8Array([9, -8, -8, -7, -6, -5, -4]))
         this.wirte(this.getByte(new Int8Array([0x07, 0x04])))
         break;
 
       case "5":
+        // wx.openBluetoothAdapter({
+        //   success: function(res) {
+        //     console.log('打开蓝牙模块')
+        //   },
+        //   fail:function(res){
+        //     console.log('打开蓝牙模块失败',res)
+        //   }
+        // })
         this.setEq(new Int8Array([0, 0, 0, 0, 0, 0, 0]))
         this.wirte(this.getByte(new Int8Array([0x07, 0x05])))
         break;
     }
 
+  },
+  /**聆听位*/
+  onListen(e){
+    var that = this;
+    if(this.data.listen){
+      that.wirte(this.getByte(new Int8Array([0x0d,0x00])));
+    }else{
+      that.wirte(this.getByte(new Int8Array([0x0d, 0x01])));
+    }
+
+    this.setData({
+      listen:!this.data.listen,
+    })
   },
   /**EQing*/
   EQchangeing(e) {
@@ -292,34 +371,36 @@ Page({
     this.wirte(this.getByte(new Int8Array([0x0a, 0, 0, 0, 0, 0, 0, 0, 0, 0])))
   },
   onBack(e) {
-    console.log('退出');
-    wx.closeBLEConnection({
-      deviceId: mac,
-      success: function(res) {
-        console.log('断开链接')
-        that.disConnect();
-      },
-      complete: function(res) {
-        console.log('跳转到搜索页面')
-        wx.reLaunch({
-          url: '../start/start',
-        })
-      }
-    })
+    wx.navigateBack({})
+    // console.log('退出');
+    // wx.closeBLEConnection({
+    //   deviceId: mac,
+    //   success: function(res) {
+    //     console.log('断开链接')
+    //     that.disConnect();
+    //   },
+    //   complete: function(res) {
+    //     console.log('跳转到搜索页面')
+    //     wx.reLaunch({
+    //       url: '../start/start',
+    //     })
+    //   }
+    // })
   },
   /*--------------------------------------------自定调用方法-------------------------------------------------*/
-  /**连接ble*/
+  /**一级连接ble*/
   connectBle() {
     var that = this;
     wx.createBLEConnection({
       deviceId: mac,
       timeout: 5000,
       success: function(res) {
+        console.log('一级连接成功');
         that.onConnectOK(res)
       },
       fail: function(res) {
         // that.onConnectNO(res)
-        console.log('第一次连接失败', res)
+        console.log('一级连接失败', res)
         //第一次失败2秒后再次连接
         setTimeout(function() {
           wx.createBLEConnection({
@@ -339,7 +420,7 @@ Page({
 
   },
   /**
-   * 蓝牙连接成功
+   * 蓝牙连接成功,二级连接获取server
    */
   onConnectOK: function(res) {
     var that = this;
@@ -442,16 +523,18 @@ Page({
         // sound[1] = -121;
         // sound[2] = 124;
         // that.wirte(sound)
+        that.wirte(that.getByte(new Int8Array([0x01, 0x01])))
 
         wx.onBLECharacteristicValueChange(function(res) {
           console.log('###收到消息:', res);
           var v = res.value;
-          var array = new Int8Array(v);
+          var array = new Int16Array(v);
 
           // that.setData({
           //   slider: array[0]
           // })
           console.log(array)
+          that.setState(array);
         })
       },
     })
@@ -476,6 +559,18 @@ Page({
         })
       }, 2000)
     }
+  },
+  /**断开连接后重新连接一个空地址，有利于新的连接*/
+  disConnect: function() {
+    wx.createBLEConnection({
+      deviceId: '00:00:00:00:00',
+      success: function(res) {
+        console.log("这也能连接成功？");
+      },
+      fail: function(res) {
+        console.log("尝试连接失败");
+      }
+    })
   },
 
   /**
@@ -524,6 +619,34 @@ Page({
       eq7: eqs[6],
     })
 
+  },
+  /**设置状态*/
+  setState: function(data) {
+    var that = this;
+    if (data[0] == 0x58 && data[1] == 0x20) {
+      //第一条消息 长度15+3 (+1)参数1：输入通道切换， 参数2：主音量设置， 参数3：音效模式， 参数4-9：相位设置， 参数10-15：延时设置，
+      if (data.length == 18){
+        that.setData({
+          aux_index : data[2],
+          sound : data[3],
+          parTop : data[4],
+
+          delay1: data[11] / 2,
+          delay2: data[12] / 2,
+          delay3: data[13] / 2,
+          delay4: data[14] / 2,
+        })
+      }
+    }
+
+    if (data[0] == 0x58 && data[1] == 0x21) {
+      //第二条消息 长度14+3 (+1)参数1-9：GEQ调节， 参数10-11：车型选择， 参数12-13：版本号， 参数14；聆听位0关1开
+      if (data.length == 17) {
+          that.setData({
+            listen:data[15]==0x00 ? false : true,
+          })
+      }
+    }
   },
 
 

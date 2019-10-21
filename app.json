@@ -10,7 +10,8 @@
     "navigationBarBackgroundColor": "#000000",
     "navigationBarTitleText": "蓝牙通信",
     "navigationBarTextStyle": "white",
-    "backgroundColor": "#eeeeee"
+    "backgroundColor": "#eeeeee",
+    "navigationStyle":"default"
   },
   "sitemapLocation": "sitemap.json"
 }

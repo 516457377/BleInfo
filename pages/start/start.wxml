@@ -4,7 +4,7 @@
 
 <view style='color:#fff;width: 100%;border-bottom: 1px solid #555;margin-top: 5rpx;padding-bottom: 5rpx;padding-left: 20px;' wx:for="{{mList}}" bindtap='onItemClick' wx:key='*this' data-name='{{item.name}}' data-mac='{{item.mac}}' disabled='{{!openBle}}'>
   <view >{{item.name}}</view>
-  <view >{{item.mac}}</view>
+  <view style="overflow: hidden;white-space: nowrap; text-overflow: ellipsis;">{{item.mac}}</view>
 </view>
 <button style="width: 90%;margin-top:10rpx;" bindtap='onRefresh' disabled='{{!openBle}}'>刷新设备</button>
 

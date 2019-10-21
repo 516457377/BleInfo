@@ -30,6 +30,7 @@ Page({
     that = this;
     jump = false;
     autoName = 'Nodivice';
+
     //检查设备型号
     wx.getSystemInfo({
       success: function(res) {
@@ -117,7 +118,7 @@ Page({
         //存在数据直接连接  
         jump = true;
         wx.hideLoading();
-        wx.redirectTo({
+        wx.navigateTo({
           url: '../ble/ble?mac=' + that.data.mac + '&name=' + that.data.name,
           complete: function() {
             console.log('start结束')
@@ -130,33 +131,44 @@ Page({
         autoName = that.data.name;
       }
 
-      if (that.data.openBle) {
-        wx.startPullDownRefresh({})
-      } else {
-        wx.onBluetoothAdapterStateChange(function(res) { //会一直监听改变一次发送一次
-          console.log('检测蓝牙状态：', res.available, res.discovering)
-          if (!that.data.openBle && res.available) {
-            that.setData({
-              openBle: true
-            })
+      // if (that.data.openBle) {
+      //   wx.startPullDownRefresh({})
+      // } else {
+      wx.onBluetoothAdapterStateChange(function(res) { //会一直监听改变一次发送一次
+        console.log('检测蓝牙状态：', res.available, res.discovering)
+        if (that.data.openBle && !res.available) {
+          that.setData({
+            openBle: false
+          })
+          wx.showLoading({
+            title: '请打开蓝牙重试',
+            mask: !that.data.debug,
+          })
+          return;
+        }
 
-            if (that.data.name != null && that.data.mac != '' && !result && that.data.openBle && !jump) {
-              //存在数据直接连接
-              jump = true;
-              wx.hideLoading();
-              wx.redirectTo({
-                url: '../ble/ble?mac=' + that.data.mac + '&name=' + that.data.name,
-                complete: function() {
-                  console.log('start结束')
-                  wx.stopPullDownRefresh();
-                }
-              })
-            } else {
-              wx.startPullDownRefresh({})
-            }
+        if (!that.data.openBle && res.available) {
+          that.setData({
+            openBle: true
+          })
+
+          if (that.data.name != null && that.data.mac != '' && !result && that.data.openBle && !jump) {
+            //存在数据直接连接
+            jump = true;
+            wx.hideLoading();
+            wx.navigateTo({
+              url: '../ble/ble?mac=' + that.data.mac + '&name=' + that.data.name,
+              complete: function() {
+                console.log('start结束')
+                wx.stopPullDownRefresh();
+              }
+            })
+          } else {
+            wx.startPullDownRefresh({})
           }
-        })
-      }
+        }
+      })
+      // }
     }, 500)
 
   },
@@ -211,13 +223,16 @@ Page({
                   console.log('所有设备', res)
                   for (var i = 0; i < res.devices.length; i++) {
                     var ds = that.data.mList
-                    if (res.devices[i].localName.indexOf('t') == -1 &&
-                      res.devices[i].localName.indexOf('BLE') == -1 &&
-                      res.devices[i].localName.length() <= 7) { //过滤不符合蓝牙
+                    if ((res.devices[i].name.indexOf('t') == -1
+                        /*&&
+                                             res.devices[i].name.indexOf('BLE') == -1*/
+                      ) ||
+                      res.devices[i].name.length > 4) { //过滤不符合蓝牙(不包含T 或者长度大于4)
                       continue;
                     }
+                    console.log("name SIze:", res.devices[i].name.length)
                     var temp = {
-                      name: res.devices[i].localName,
+                      name: res.devices[i].name,
                       mac: res.devices[i].deviceId
                     }
                     ds.push(temp)
@@ -262,7 +277,7 @@ Page({
                               console.log('点击确认重连', remeber);
                               jump = true;
                               wx.hideLoading();
-                              wx.redirectTo({
+                              wx.navigateTo({
                                 url: '../ble/ble?mac=' + that.data.mList[remeber].mac + '&name=' + that.data.mList[remeber].name,
                                 complete: function() {
 
@@ -346,7 +361,7 @@ Page({
     }
     jump = true;
     wx.hideLoading();
-    wx.redirectTo({
+    wx.navigateTo({
       url: '../ble/ble?mac=' + res.currentTarget.dataset.mac + '&name=' + res.currentTarget.dataset.name,
       complete: function() {
         console.log('start结束')
@@ -406,7 +421,7 @@ Page({
               jump = true;
 
               wx.hideLoading();
-              wx.redirectTo({
+              wx.navigateTo({
                 url: '../ble/ble?mac=' + res.devices[i].deviceId + '&name=' + res.devices[i].localName,
                 complete: function() {
                   console.log('start结束')

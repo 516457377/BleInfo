@@ -8,9 +8,9 @@ page {
 .tui-tabbar-cell {
   display: table-cell;
   width: 100%;
-  height: 100rpx;
-  line-height: 100rpx;
-  font-size: 35rpx;
+  height: 150rpx;
+  line-height: 150rpx;
+  font-size: 45rpx;
   text-align: center;
 }
 
@@ -63,12 +63,12 @@ page {
 
 @font-face {
   font-family: 'iconfont'; /* project id 1449427 */
-  src: url('//at.alicdn.com/t/font_1449427_ncls2f27zek.eot');
-  src: url('//at.alicdn.com/t/font_1449427_ncls2f27zek.eot?#iefix') format('embedded-opentype'),
-         url('//at.alicdn.com/t/font_1449427_ncls2f27zek.woff2') format('woff2'),
-         url('//at.alicdn.com/t/font_1449427_ncls2f27zek.woff') format('woff'),
-         url('//at.alicdn.com/t/font_1449427_ncls2f27zek.ttf') format('truetype'),
-         url('//at.alicdn.com/t/font_1449427_ncls2f27zek.svg#iconfont') format('svg');
+  src: url('//at.alicdn.com/t/font_1449427_qits7io90ch.eot');
+  src: url('//at.alicdn.com/t/font_1449427_qits7io90ch.eot?#iefix') format('embedded-opentype'),
+         url('//at.alicdn.com/t/font_1449427_qits7io90ch.woff2') format('woff2'),
+         url('//at.alicdn.com/t/font_1449427_qits7io90ch.woff') format('woff'),
+         url('//at.alicdn.com/t/font_1449427_qits7io90ch.ttf') format('truetype'),
+         url('//at.alicdn.com/t/font_1449427_qits7io90ch.svg#iconfont') format('svg');
 }
 
 .iconfont {
@@ -110,4 +110,7 @@ page {
 
 .icon-top6:before {
   content: '\e6ba';
+}
+.icon-listen:before {
+  content: '\e684';
 }
