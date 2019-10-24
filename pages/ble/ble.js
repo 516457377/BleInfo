@@ -29,7 +29,12 @@ Page({
     eq5: 0,
     eq6: 0,
     eq7: 0,
-    listen:false,//聆听位
+    listen: false, //聆听位
+    //版本相关
+    dsp: "/APP:1.2.0",
+    time: 0,
+    cKnum: 0,
+
     //-------------------------------
     connect: false, //连接状态
     deviceID: '', //当前连接设备id(MAC)
@@ -144,6 +149,45 @@ Page({
     } else {
       this.wirte(this.getByte(new Int8Array([0x02, 0x01])));
     }
+  },
+  /**查看版本 音量控制点击8次*/
+  onSoundClick(e) {
+    var temp;
+    var that = this;
+    console.log("消息打印", this.data.cKnum)
+
+    if (that.data.cKnum >= 8){
+      wx.showModal({
+        title: '版本信息',
+        content: that.data.dsp,
+        showCancel: false,
+        confirmColor: '#007aff',
+        success: function () {
+          
+        }
+      });
+      that.setData({
+        cKnum: 0,
+      })
+      return;
+    }
+
+    if(that.data.time != 0){//存在延时,先取消之前的
+      clearTimeout(that.data.time);
+    }
+
+    temp = setTimeout(function() {
+      that.setData({
+        cKnum: 0,
+        time: 0,
+      })
+    }, 5000);
+
+    this.setData({
+      time: temp,
+      cKnum: that.data.cKnum+1,
+    })
+
   },
   /**音量ing*/
   Soundchangeing(e) {
@@ -303,16 +347,16 @@ Page({
 
   },
   /**聆听位*/
-  onListen(e){
+  onListen(e) {
     var that = this;
-    if(this.data.listen){
-      that.wirte(this.getByte(new Int8Array([0x0d,0x00])));
-    }else{
+    if (this.data.listen) {
+      that.wirte(this.getByte(new Int8Array([0x0d, 0x00])));
+    } else {
       that.wirte(this.getByte(new Int8Array([0x0d, 0x01])));
     }
 
     this.setData({
-      listen:!this.data.listen,
+      listen: !this.data.listen,
     })
   },
   /**EQing*/
@@ -528,7 +572,7 @@ Page({
         wx.onBLECharacteristicValueChange(function(res) {
           console.log('###收到消息:', res);
           var v = res.value;
-          var array = new Int16Array(v);
+          var array = new Int8Array(v);
 
           // that.setData({
           //   slider: array[0]
@@ -625,11 +669,11 @@ Page({
     var that = this;
     if (data[0] == 0x58 && data[1] == 0x20) {
       //第一条消息 长度15+3 (+1)参数1：输入通道切换， 参数2：主音量设置， 参数3：音效模式， 参数4-9：相位设置， 参数10-15：延时设置，
-      if (data.length == 18){
+      if (data.length == 18) {
         that.setData({
-          aux_index : data[2],
-          sound : data[3],
-          parTop : data[4],
+          aux_index: data[2],
+          sound: data[3],
+          parTop: data[4],
 
           delay1: data[11] / 2,
           delay2: data[12] / 2,
@@ -642,9 +686,10 @@ Page({
     if (data[0] == 0x58 && data[1] == 0x21) {
       //第二条消息 长度14+3 (+1)参数1-9：GEQ调节， 参数10-11：车型选择， 参数12-13：版本号， 参数14；聆听位0关1开
       if (data.length == 17) {
-          that.setData({
-            listen:data[15]==0x00 ? false : true,
-          })
+        that.setData({
+          listen: data[15] == 0x00 ? false : true,
+          dsp: 'DSP:'+data[13] + "." + data[14]+that.data.dsp,
+        })
       }
     }
   },

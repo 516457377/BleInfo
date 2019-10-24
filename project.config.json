@@ -11,7 +11,7 @@
 		"newFeature": true
 	},
 	"compileType": "miniprogram",
-	"libVersion": "2.0.4",
+	"libVersion": "2.9.0",
 	"appid": "wx9b6d9b5a100da4d3",
 	"projectname": "bleInfo",
 	"debugOptions": {
