@@ -31,9 +31,13 @@ Page({
     eq7: 0,
     listen: false, //聆听位
     //版本相关
-    dsp: "/APP:1.2.0",
+    dsp: "/APP:1.3.0",
     time: 0,
     cKnum: 0,
+    //验证消息
+    callBack: false,
+    //确定退出
+    onback: false,
 
     //-------------------------------
     connect: false, //连接状态
@@ -68,23 +72,17 @@ Page({
   /**
    * 生命周期函数--监听页面初次渲染完成
    */
-  onReady: function() {
-
-  },
+  onReady: function() {},
 
   /**
    * 生命周期函数--监听页面显示
    */
-  onShow: function() {
-
-  },
+  onShow: function() {},
 
   /**
    * 生命周期函数--监听页面隐藏
    */
-  onHide: function() {
-    // console.log("hind")
-  },
+  onHide: function() {},
 
   /**
    * 生命周期函数--监听页面卸载
@@ -92,11 +90,14 @@ Page({
   onUnload: function() {
     var that = this;
     console.log('Unload:退出');
+    this.setData({
+      onback : true,
+    })
     wx.closeBLEConnection({
       deviceId: mac,
       success: function(res) {
         console.log('断开链接')
-        that.disConnect();
+        // that.disConnect();
       },
       complete: function(res) {
         console.log('跳转到搜索页面')
@@ -110,23 +111,15 @@ Page({
   /**
    * 页面相关事件处理函数--监听用户下拉动作
    */
-  onPullDownRefresh: function() {
-
-  },
-
+  onPullDownRefresh: function() {},
   /**
    * 页面上拉触底事件的处理函数
    */
-  onReachBottom: function() {
-
-  },
-
+  onReachBottom: function() {},
   /**
    * 用户点击右上角分享
    */
-  onShareAppMessage: function() {
-
-  },
+  onShareAppMessage: function() {},
   /**------------------------------------------------------自定义方法(监听)-----------------------------------------------------*/
   //页面切换
   changeTabbar(e) {
@@ -449,7 +442,7 @@ Page({
         setTimeout(function() {
           wx.createBLEConnection({
             deviceId: mac,
-            timeout: 10000,
+            timeout: 5000,
             success: function(res) {
               that.onConnectOK(res)
             },
@@ -491,14 +484,25 @@ Page({
         // wx.setStorageSync('mac', mac)
         wx.onBLEConnectionStateChange(function(res) { //蓝牙状态监听
           console.log('连接状态', res.connected, "connect:", that.data.connect)
+
           if (!res.connected && that.data.connect) {
             //蓝牙断开后回到首页
             console.log('监听跳转')
-            wx.reLaunch({
-              url: '../start/start?result=true',
-            })
+            if(!that.data.onback){
+              //重连
+              wx.showLoading({
+                title: '请稍后',
+                mask: !that.data.debug,
+              })
+              that.connectBle();
+
+            }
+            // wx.reLaunch({
+            //   url: '../start/start?result=true',
+            // })
           }
         })
+
         wx.getBLEDeviceCharacteristics({
           deviceId: mac,
           serviceId: that.data.UUID_SERVER,
@@ -567,7 +571,8 @@ Page({
         // sound[1] = -121;
         // sound[2] = 124;
         // that.wirte(sound)
-        that.wirte(that.getByte(new Int8Array([0x01, 0x01])))
+        //获取回调消息
+        that.getCallBack();
 
         wx.onBLECharacteristicValueChange(function(res) {
           console.log('###收到消息:', res);
@@ -598,9 +603,10 @@ Page({
     if (!that.data.debug) {
       setTimeout(function() {
         console.log('链接失败跳转')
-        wx.reLaunch({
-          url: '../start/start?result=true',
-        })
+        wx.navigateBack({})
+        // wx.reLaunch({
+        //   url: '../start/start?result=true',
+        // })
       }, 2000)
     }
   },
@@ -679,18 +685,30 @@ Page({
           delay2: data[12] / 2,
           delay3: data[13] / 2,
           delay4: data[14] / 2,
+          callBack: true,
         })
       }
     }
 
     if (data[0] == 0x58 && data[1] == 0x21) {
       //第二条消息 长度14+3 (+1)参数1-9：GEQ调节， 参数10-11：车型选择， 参数12-13：版本号， 参数14；聆听位0关1开
-      if (data.length == 17) {
+      if (data.length == that.data.debug ? 16 : 17) {
         that.setData({
           listen: data[15] == 0x00 ? false : true,
           dsp: 'DSP:'+data[13] + "." + data[14]+that.data.dsp,
         })
       }
+    }
+  },
+  /**循环获取状态，若没有获取到回调数据一直发送*/
+  getCallBack(){
+    var that = this;
+    if(!this.data.callBack){
+      that.wirte(that.getByte(new Int8Array([0x01, 0x01])));
+      setTimeout(function () {
+        that.getCallBack();//1秒后再次循环
+      },1000);
+
     }
   },
 

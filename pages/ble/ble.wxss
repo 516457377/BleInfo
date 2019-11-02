@@ -40,7 +40,7 @@ page {
 }
 
 .aux-change.not {
-  border-right: 1px solid #4da4dd;
+  border-right: 0px solid #4da4dd;
   color: #fff;
 }
 

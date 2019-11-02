@@ -63,6 +63,23 @@ Page({
       })
       return;
     }
+    // wx.clearStorageSync()
+
+    var f = wx.getStorageSync('first');
+    console.log('版本状态', f == "", f);
+    if (f == "" && app.getPlatform() == 'android') {
+      wx.showModal({
+        title: '温馨提示',
+        content: 'Android小程序因平台限制，若蓝牙配对后会连接不上，请不要配对设备，使用途中可能会出现多次重连，安卓端尽量使用APK端软件。',
+        showCancel: false,
+        confirmColor: '#007aff',
+        success: function() {
+          wx.setStorageSync('first', 'false')
+        }
+      });
+    }
+
+
 
     if (options.result) {
       result = true;
@@ -101,6 +118,11 @@ Page({
       }
 
       if (res.available && !that.data.openBle) {
+        wx.showLoading({
+          title: '模块加载中',
+          mask: !that.data.debug,
+        })
+
         wx.openBluetoothAdapter({
           success: function(res) {
             console.log('打开蓝牙成功')
@@ -108,11 +130,13 @@ Page({
               openBle: true,
             })
             wx.startPullDownRefresh({})
+
           },
           fail: function(res) {
             console.log('打开失败', res)
           }
         })
+
       }
 
 
@@ -186,8 +210,8 @@ Page({
       mList: [{}]
     })
 
-    console.log("重启设备");
-    wx.hideLoading()
+    console.log("搜索设备");
+    // wx.hideLoading()
     wx.startBluetoothDevicesDiscovery({
       allowDuplicatesKey: false,
       success: function(res) {
@@ -250,6 +274,7 @@ Page({
               console.log('关闭扫描')
               wx.stopPullDownRefresh(); //停止当前页面的下拉刷新
               wx.hideNavigationBarLoading(); //加载动画结束
+              wx.hideLoading();
               console.log('扫描结果：length:', that.data.mList, '可能连接名：', autoName)
               if (that.data.mList.length <= 1) {
                 console.log('没有扫描到')
@@ -264,178 +289,52 @@ Page({
           })
         },
       })
-    }, 2500)
-
-
-
-
-
-
-
-    // wx.closeBluetoothAdapter({
-    //   success: function(res) {},
-    // })
-    // wx.openBluetoothAdapter({
-    //   success: function(res) {
-    //     console.log("重启设备");
-    //     wx.hideLoading()
-    //     wx.startBluetoothDevicesDiscovery({
-    //       allowDuplicatesKey: false,
-    //       success: function(res) {
-    //         console.log('打开扫描开始:', res)
-
-    //         wx.onBluetoothDeviceFound(function(res) {
-    //           console.log('发现设备', res)
-    //           // var ds = that.data.mList
-    //           // var temp = {
-    //           //   name: res.devices[0].name,
-    //           //   mac: res.devices[0].deviceId
-    //           // }
-    //           // ds.push(temp)
-    //           // that.setData({
-    //           //   mList: ds
-    //           // })
-    //         })
-    //       },
-    //       fail: function(res) {
-    //         console.log('打开扫描设备失败', res)
-    //       }
-    //     })
-    //     //3秒后关闭扫描
-    //     clearTimeout(num) //只需要一个定时器存在
-    //     num = setTimeout(function() {
-    //       wx.stopBluetoothDevicesDiscovery({
-    //         success: function(res) {
-
-    //           wx.getBluetoothDevices({
-    //             success: function(res) {
-    //               console.log('所有设备', res)
-    //               for (var i = 0; i < res.devices.length; i++) {
-    //                 var ds = that.data.mList
-    //                 if ((res.devices[i].name.indexOf('t') == -1
-    //                     /*&&
-    //                                          res.devices[i].name.indexOf('BLE') == -1*/
-    //                   ) ||
-    //                   res.devices[i].name.length > 4) { //过滤不符合蓝牙(不包含T 或者长度大于4)
-    //                   continue;
-    //                 }
-    //                 console.log("name SIze:", res.devices[i].name.length)
-    //                 var temp = {
-    //                   name: res.devices[i].name,
-    //                   mac: res.devices[i].deviceId
-    //                 }
-    //                 ds.push(temp)
-    //                 that.setData({
-    //                   mList: ds
-    //                 })
-    //               }
-    //             },
-    //             fail: function(res) {
-    //               that.setData({
-    //                 mList: [{
-    //                   name: '未搜索到设备，请刷新',
-    //                   mac: ''
-    //                 }]
-    //               })
-    //             },
-    //             complete: function(res) {
-    //               console.log('关闭扫描')
-    //               wx.stopPullDownRefresh(); //停止当前页面的下拉刷新
-    //               wx.hideNavigationBarLoading(); //加载动画结束
-    //               console.log('扫描结果：length:', that.data.mList, '可能连接名：', autoName)
-    //               if (that.data.mList.length <= 1) {
-    //                 console.log('没有扫描到')
-    //                 that.setData({
-    //                   mList: [{
-    //                     name: '未搜索到设备，请刷新',
-    //                     mac: ''
-    //                   }]
-    //                 })
-    //               } else {
-    //                 var remeber = -1;
-    //                 for (var i = 0; i < that.data.mList.length; i++) {
-    //                   if (autoName == that.data.mList[i].name && !jump) {
-    //                     console.log('找到了相符的:', autoName, i);
-    //                     remeber = i;
-    //                     wx.showModal({
-    //                       title: '发现可重连设备',
-    //                       content: '是否重连',
-    //                       showCancel: true,
-    //                       success(res) {
-    //                         if (res.confirm) {
-    //                           console.log('点击确认重连', remeber);
-    //                           jump = true;
-    //                           wx.hideLoading();
-    //                           wx.navigateTo({
-    //                             url: '../ble/ble?mac=' + that.data.mList[remeber].mac + '&name=' + that.data.mList[remeber].name,
-    //                             complete: function() {
-
-    //                               return;
-    //                             }
-    //                           })
-
-    //                         } else {
-    //                           console.log('取消重连');
-    //                           autoName = 'Nodivice';
-    //                         }
-    //                       }
-    //                     })
-    //                   }
-    //                 }
-    //               }
-
-    //             }
-    //           })
-    //         },
-    //       })
-    //     }, 2500)
-    //   },
-    // })
-
-
-    // clearTimeout(num)
+    }, 5000)
 
   },
 
   /**
    * 生命周期函数--监听页面隐藏
    */
-  onHide: function() {
-
-  },
-
+  onHide: function() {},
   /**
    * 生命周期函数--监听页面卸载
    */
-  onUnload: function() {
-
-  },
+  onUnload: function() {},
 
   /**
    * 页面相关事件处理函数--监听用户下拉动作
    */
   onPullDownRefresh: function() {
+    if (!this.data.openBle) {
+      wx.stopPullDownRefresh(); //停止当前页面的下拉刷新
+      wx.hideNavigationBarLoading(); //加载动画结束
+      return;
+    }
     console.log('下拉刷新')
+    wx.showLoading({
+      title: '搜索设备中',
+      mask: !this.data.debug,
+    })
     wx.showNavigationBarLoading(); //加载动画开始
 
+    setTimeout(function() {
+      wx.stopPullDownRefresh(); //停止当前页面的下拉刷新
+      wx.hideNavigationBarLoading(); //加载动画结束
+    }, 10000)
+
     this.searchDevice()
-
-
   },
 
   /**
    * 页面上拉触底事件的处理函数
    */
-  onReachBottom: function() {
-
-  },
+  onReachBottom: function() {},
 
   /**
    * 用户点击右上角分享
    */
-  // onShareAppMessage: function() {
-
-  // },
+  // onShareAppMessage: function() {},
   /**
    * 刷新
    */
@@ -499,6 +398,8 @@ Page({
       }
     })
   },
+
+
   connectForName: function(name) {
     wx.getBluetoothDevices({
       success: function(res) {
@@ -532,6 +433,7 @@ Page({
       },
     })
   },
+
   /**版本比较*/
   versionCompare: function(ver1, ver2) {
     var version1pre = parseFloat(ver1)
