@@ -31,13 +31,16 @@ Page({
     eq7: 0,
     listen: false, //聆听位
     //版本相关
-    dsp: "/APP:1.3.0",
+    dsp:"", 
+    dsp2: "/APP:1.3.0",
     time: 0,
     cKnum: 0,
     //验证消息
     callBack: false,
     //确定退出
     onback: false,
+    //连接次数限制20次。
+    connectNum: 0,
 
     //-------------------------------
     connect: false, //连接状态
@@ -53,6 +56,7 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function(options) {
+    
     var that = this;
     mac = options.mac;
     name = options.name;
@@ -64,7 +68,7 @@ Page({
       title: '连接中',
       mask: !that.data.debug,
     });
-
+    // that.connectIng();
     that.connectBle();
 
   },
@@ -77,7 +81,8 @@ Page({
   /**
    * 生命周期函数--监听页面显示
    */
-  onShow: function() {},
+  onShow: function() {
+  },
 
   /**
    * 生命周期函数--监听页面隐藏
@@ -88,6 +93,7 @@ Page({
    * 生命周期函数--监听页面卸载
    */
   onUnload: function() {
+    
     var that = this;
     console.log('Unload:退出');
     this.setData({
@@ -100,10 +106,10 @@ Page({
         // that.disConnect();
       },
       complete: function(res) {
-        console.log('跳转到搜索页面')
-        wx.reLaunch({
-          url: '../start/start',
-        })
+        // console.log('跳转到搜索页面')
+        // wx.reLaunch({
+        //   url: '../start/start',
+        // })
       }
     })
   },
@@ -120,7 +126,7 @@ Page({
    * 用户点击右上角分享
    */
   onShareAppMessage: function() {},
-  /**------------------------------------------------------自定义方法(监听)-----------------------------------------------------*/
+  /**-----------------------------------------------------自定义方法(监听)-----------------------------------------------------*/
   //页面切换
   changeTabbar(e) {
     this.setData({
@@ -152,7 +158,7 @@ Page({
     if (that.data.cKnum >= 8){
       wx.showModal({
         title: '版本信息',
-        content: that.data.dsp,
+        content: that.data.dsp + that.data.dsp2,
         showCancel: false,
         confirmColor: '#007aff',
         success: function () {
@@ -408,7 +414,9 @@ Page({
     this.wirte(this.getByte(new Int8Array([0x0a, 0, 0, 0, 0, 0, 0, 0, 0, 0])))
   },
   onBack(e) {
-    wx.navigateBack({})
+    wx.navigateBack({
+      delta: 1
+    })
     // console.log('退出');
     // wx.closeBLEConnection({
     //   deviceId: mac,
@@ -425,6 +433,64 @@ Page({
     // })
   },
   /*--------------------------------------------自定调用方法-------------------------------------------------*/
+  connectIng(){
+    var that = this;
+    console.log('多次连接', that.data.connectNum);
+    if (that.data.connectNum > 60){
+      return;
+    }
+    that.setData({
+      connectNum:that.data.connectNum+1,
+    })
+    wx.createBLEConnection({
+      deviceId: mac,
+      success: function(res) {
+        wx.writeBLECharacteristicValue({
+          deviceId: mac,
+          serviceId: that.data.UUID_SERVER,
+          characteristicId: that.data.UUID_WRITE,
+          value: that.getByte(new Int8Array([0x00])).buffer,
+          success: function (res) {
+            console.log('发送成功', res)
+          },
+          fail(res) {
+            console.log(res, "发送失败")
+            wx.getBLEDeviceServices({
+              deviceId: mac,
+              success: function(res) {
+                wx.writeBLECharacteristicValue({
+                  deviceId: mac,
+                  serviceId: that.data.UUID_SERVER,
+                  characteristicId: that.data.UUID_WRITE,
+                  value: that.getByte(new Int8Array([0x00])).buffer,
+                  success: function (res) {
+                    console.log('获取发送成功', res)
+                  },fail: function(res){
+                    console.log(res, "发送失败")
+                    that.connectIng();
+                  }
+                  })
+              },fail: function(res){
+                wx.closeBLEConnection({
+                  deviceId: mac,
+                  success: function (res) {
+                    console.log(res, "获取失败")
+                    that.connectIng();
+                  },
+                })
+              }
+            })
+            
+          }
+        })
+      },
+      fail: function(res){
+        console.log(res, "连接失败")
+        that.connectIng();
+      }
+    })
+  },
+
   /**一级连接ble*/
   connectBle() {
     var that = this;
@@ -456,13 +522,73 @@ Page({
 
 
   },
+  onSendSuccess:function(r){
+    that.setData({
+      connect: true
+    })
+    wx.setNavigationBarTitle({
+      title: name + '(已连接)',
+    })
+    wx.hideLoading()
+    wx.onBLEConnectionStateChange(function (res) { //蓝牙状态监听
+      console.log('连接状态', res.connected, "connect:", that.data.connect)
+
+      if (!res.connected && that.data.connect) {
+        //蓝牙断开后回到首页
+        console.log('监听跳转')
+        if (!that.data.onback) {
+          //重连
+          wx.showLoading({
+            title: '请稍后',
+            mask: !that.data.debug,
+          })
+          that.connectBle();
+
+        }
+        // wx.reLaunch({
+        //   url: '../start/start?result=true',
+        // })
+      }
+    })
+
+    wx.notifyBLECharacteristicValueChange({
+      deviceId: mac,
+      serviceId: that.data.UUID_SERVER,
+      characteristicId: that.data.UUID_READ,
+      state: true,
+      success: function (res) {
+        console.log('监听开启成功')
+        //连接成功发送请求
+        // const sound = new Int8Array(3);
+        // sound[0] = 121;
+        // sound[1] = -121;
+        // sound[2] = 124;
+        // that.wirte(sound)
+        //获取回调消息
+        that.getCallBack();
+
+        wx.onBLECharacteristicValueChange(function (res) {
+          console.log('###收到消息:', res);
+          var v = res.value;
+          var array = new Int8Array(v);
+
+          // that.setData({
+          //   slider: array[0]
+          // })
+          console.log(array)
+          that.setState(array);
+        })
+      },
+    })
+
+  },
   /**
    * 蓝牙连接成功,二级连接获取server
    */
   onConnectOK: function(res) {
     var that = this;
     console.log('蓝牙连接成功', res)
-
+    
     // wx.setStorage({
     //   key: '',
     //   data: '',
@@ -603,7 +729,9 @@ Page({
     if (!that.data.debug) {
       setTimeout(function() {
         console.log('链接失败跳转')
-        wx.navigateBack({})
+        wx.navigateBack({
+          delta: 1
+        })
         // wx.reLaunch({
         //   url: '../start/start?result=true',
         // })
@@ -695,7 +823,7 @@ Page({
       if (data.length == that.data.debug ? 16 : 17) {
         that.setData({
           listen: data[15] == 0x00 ? false : true,
-          dsp: 'DSP:'+data[13] + "." + data[14]+that.data.dsp,
+          dsp: 'DSP:'+data[13] + "." + data[14],
         })
       }
     }

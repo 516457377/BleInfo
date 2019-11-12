@@ -4,6 +4,7 @@ var app = getApp()
 var result = false;
 var autoName = 'Nodivice';
 var jump = false;
+var jmac = '';
 Page({
 
   /**
@@ -19,6 +20,7 @@ Page({
     debug: __wxConfig.envVersion == "develop" ? true : false,
     name: '',
     mac: '',
+    timeOut:0,
     // ios: false
   },
 
@@ -154,6 +156,23 @@ Page({
    * 每次进入会调用
    */
   onShow: function() {
+
+    wx.closeBLEConnection({
+      deviceId: jmac,
+      success: function (res) {
+        console.log('断开')
+      },
+    })
+    wx.closeBluetoothAdapter({
+      success: function (res) {
+        console.log('关闭')
+      },
+    })
+    wx.openBluetoothAdapter({
+      success: function (res) {
+        console.log('打开')
+      },
+    })
 
     // this.setData({
     //   name: wx.getStorageSync('name'),
@@ -311,6 +330,25 @@ Page({
       wx.hideNavigationBarLoading(); //加载动画结束
       return;
     }
+
+    wx.closeBLEConnection({
+      deviceId: jmac,
+      success: function(res) {
+        console.log('断开')
+      },
+    })
+    wx.closeBluetoothAdapter({
+      success: function(res) {
+        console.log('关闭')
+      },
+    })
+    wx.openBluetoothAdapter({
+      success: function(res) {
+        console.log('打开')
+      },
+    })
+
+
     console.log('下拉刷新')
     wx.showLoading({
       title: '搜索设备中',
@@ -318,10 +356,15 @@ Page({
     })
     wx.showNavigationBarLoading(); //加载动画开始
 
-    setTimeout(function() {
+    var time = setTimeout(function() {
       wx.stopPullDownRefresh(); //停止当前页面的下拉刷新
       wx.hideNavigationBarLoading(); //加载动画结束
+      wx.hideLoading();
     }, 10000)
+
+    this.setData({
+      timeOut: time,
+    })
 
     this.searchDevice()
   },
@@ -336,7 +379,7 @@ Page({
    */
   // onShareAppMessage: function() {},
   /**
-   * 刷新
+   * 点击刷新
    */
   onRefresh: function() {
     wx.startPullDownRefresh({})
@@ -349,88 +392,15 @@ Page({
     }
     jump = true;
     wx.hideLoading();
+    clearTimeout(this.data.timeOut);
+    this.setData({
+      jmac: res.currentTarget.dataset.mac,
+    })
     wx.navigateTo({
       url: '../ble/ble?mac=' + res.currentTarget.dataset.mac + '&name=' + res.currentTarget.dataset.name,
       complete: function() {
         console.log('start结束')
       }
-    })
-  },
-  onClick: function(res) {
-    var that = this
-    wx.scanCode({
-      success: function(res) {
-        console.log(res.result, '扫码成功')
-        var url = res.result;
-        var name, mac;
-        if (that.data.debug) {
-
-        }
-        // url = 'http://www.xxx.com/downapp/xxx&SPP_Ble&08:7C:BE:96:27:04'
-        //http://www.xxx.com/downapp/xxx&SPP_Ble&08:7C:BE:96:27:04
-        // name = url.substring(url.indexOf('&') + 1, url.lastIndexOf('&'))
-        // mac = url.substring(url.lastIndexOf('&') + 1, url.length)
-
-        if (url.indexOf('##') != -1) { //识别码 双#
-          name = url.substring(url.indexOf('##') + 2);
-          that.connectForName(name)
-        } else {
-          console.log('不跳转')
-
-          wx.showToast({
-            title: '二维码识别失败\n请扫描正确二维码',
-            duration: 3000,
-            icon: 'none'
-            // image:'../../src/images/warning.png'
-          })
-          return;
-        }
-
-      },
-      fail: function(res) {
-        console.log(res.result, '扫码失败')
-        wx.showToast({
-          title: '二维码识别失败\n请扫描正确二维码',
-          duration: 3000,
-          icon: 'none'
-          // image:'../../src/images/warning.png'
-        })
-      }
-    })
-  },
-
-
-  connectForName: function(name) {
-    wx.getBluetoothDevices({
-      success: function(res) {
-
-        for (var i = 0; i < res.devices.length; i++) {
-
-          if (res.devices[i].name.indexOf(name) > -1 || res.devices[i].localName.indexOf(name) > -1) {
-            if (!jump) {
-              jump = true;
-
-              wx.hideLoading();
-              wx.navigateTo({
-                url: '../ble/ble?mac=' + res.devices[i].deviceId + '&name=' + res.devices[i].localName,
-                complete: function() {
-                  console.log('start结束')
-                  wx.stopPullDownRefresh();
-                  return;
-                }
-              })
-            }
-
-          }
-        }
-        console.log("没有找到合适的连接设备");
-        wx.showToast({
-          title: '二维码连接失败\n请确认设备状态后重试',
-          duration: 3000,
-          icon: 'none'
-          // image:'../../src/images/warning.png'
-        })
-      },
     })
   },
 
