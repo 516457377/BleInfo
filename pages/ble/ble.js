@@ -32,7 +32,7 @@ Page({
     listen: false, //聆听位
     //版本相关
     dsp: "",
-    dsp2: "/APP:1.3.2",
+    dsp2: "/APP:1.3.3",
     time: 0,
     cKnum: 0,
     //验证消息
