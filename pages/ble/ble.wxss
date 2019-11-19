@@ -1,6 +1,8 @@
 /* pages/ble/ble.wxss */
 
 page {
+  width:100%;
+  overflow: hidden;
   background-color: #63666b;
   height: 100%;
 }

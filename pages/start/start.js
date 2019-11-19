@@ -20,7 +20,9 @@ Page({
     debug: __wxConfig.envVersion == "develop" ? true : false,
     name: '',
     mac: '',
-    timeOut:0,
+    timeOut: 0,
+    //初始化成功
+    isInit: false,
     // ios: false
   },
 
@@ -29,7 +31,7 @@ Page({
    */
   onLoad: function(options) {
     console.log(this.route, 'onLoad');
-    that = this;
+    var that = this;
     jump = false;
     autoName = 'Nodivice';
 
@@ -67,7 +69,17 @@ Page({
     }
     // wx.clearStorageSync()
 
-    var f = wx.getStorageSync('first');
+    var f = wx.getStorageSync('first2');
+
+    setTimeout(function() {
+      if (!that.data.isInit) {
+        console.log('执行重新加载');
+        wx.reLaunch({
+          url: 'start',
+        })
+      }
+    }, 5000);
+
     console.log('版本状态', f == "", f);
     if (f == "" && app.getPlatform() == 'android') {
       wx.showModal({
@@ -76,7 +88,8 @@ Page({
         showCancel: false,
         confirmColor: '#007aff',
         success: function() {
-          wx.setStorageSync('first', 'false')
+          wx.clearStorageSync();
+          wx.setStorageSync('first2', 'false')
         }
       });
     }
@@ -86,7 +99,84 @@ Page({
     if (options.result) {
       result = true;
     }
+
+    // wx.openBluetoothAdapter({ //初始化蓝牙模块
+    //   success: function(res) {
+    //     console.log('蓝牙初始化成功')
+    //     that.setData({
+    //       openBle: true
+    //     })
+    //     wx.startPullDownRefresh({})
+    //   },
+    //   fail: function(res) {
+    //     console.log('蓝牙初始化失败')
+    //     that.setData({
+    //       openBle: false
+    //     })
+    //     wx.showLoading({
+    //       title: '请打开蓝牙刷新',
+    //       mask: !that.data.debug,
+    //     })
+    //   }
+    // })
+
+    // wx.onBluetoothAdapterStateChange(function(res) {
+    //   console.log('1检测蓝牙状态：', res.available, res.discovering)
+    //   if (!res.available) {
+    //     wx.showLoading({
+    //       title: '请打开蓝牙刷新',
+    //       mask: !that.data.debug,
+    //     })
+    //     that.setData({
+    //       openBle: false,
+    //     })
+    //   }
+
+    //   if (res.available && !that.data.openBle) {
+    //     wx.showLoading({
+    //       title: '模块加载中',
+    //       mask: !that.data.debug,
+    //     })
+
+    //     wx.openBluetoothAdapter({
+    //       success: function(res) {
+    //         console.log('打开蓝牙成功')
+    //         that.setData({
+    //           openBle: true,
+    //         })
+    //         wx.startPullDownRefresh({})
+
+    //       },
+    //       fail: function(res) {
+    //         console.log('打开失败', res)
+    //       }
+    //     })
+
+    //   }
+
+
+    // })
+
+  },
+
+  /**
+   * 生命周期函数--监听页面初次渲染完成
+   */
+  onReady: function() {},
+
+  /**
+   * 生命周期函数--监听页面显示
+   * 每次进入会调用
+   */
+  onShow: function() {
+    this.inInit();
+
+  },
+
+  inInit() {
+    console.log('初始化蓝牙模块');
     var that = this;
+
     wx.openBluetoothAdapter({ //初始化蓝牙模块
       success: function(res) {
         console.log('蓝牙初始化成功')
@@ -104,118 +194,51 @@ Page({
           title: '请打开蓝牙刷新',
           mask: !that.data.debug,
         })
-      }
-    })
-
-    wx.onBluetoothAdapterStateChange(function(res) {
-      console.log('1检测蓝牙状态：', res.available, res.discovering)
-      if (!res.available) {
-        wx.showLoading({
-          title: '请打开蓝牙刷新',
-          mask: !that.data.debug,
-        })
+      },
+      complete: function(res) {
         that.setData({
-          openBle: false,
+          isInit: true,
         })
       }
-
-      if (res.available && !that.data.openBle) {
-        wx.showLoading({
-          title: '模块加载中',
-          mask: !that.data.debug,
-        })
-
-        wx.openBluetoothAdapter({
-          success: function(res) {
-            console.log('打开蓝牙成功')
-            that.setData({
-              openBle: true,
-            })
-            wx.startPullDownRefresh({})
-
-          },
-          fail: function(res) {
-            console.log('打开失败', res)
-          }
-        })
-
-      }
-
-
     })
 
-  },
+    setTimeout(function() {
+      wx.onBluetoothAdapterStateChange(function(res) {
+        console.log('2检测蓝牙状态：', res.available, res.discovering)
+        if (!res.available) {
+          wx.showLoading({
+            title: '请打开蓝牙刷新',
+            mask: !that.data.debug,
+          })
+          that.setData({
+            openBle: false,
+          })
+        }
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function() {},
+        if (res.available && !that.data.openBle) {
+          wx.showLoading({
+            title: '模块加载中',
+            mask: !that.data.debug,
+          })
 
-  /**
-   * 生命周期函数--监听页面显示
-   * 每次进入会调用
-   */
-  onShow: function() {
+          wx.openBluetoothAdapter({
+            success: function(res) {
+              console.log('打开蓝牙成功')
+              that.setData({
+                openBle: true,
+              })
+              wx.startPullDownRefresh({})
 
-    wx.closeBLEConnection({
-      deviceId: jmac,
-      success: function (res) {
-        console.log('断开')
-      },
-    })
-    wx.closeBluetoothAdapter({
-      success: function (res) {
-        console.log('关闭')
-      },
-    })
-    wx.openBluetoothAdapter({
-      success: function (res) {
-        console.log('打开')
-      },
-    })
+            },
+            fail: function(res) {
+              console.log('打开失败', res)
+            }
+          })
 
-    // this.setData({
-    //   name: wx.getStorageSync('name'),
-    //   mac: wx.getStorageSync('mac')
-    // })
+        }
 
-    // var that = this;
-
-    // //延迟0.5秒触发，有可能初始化蓝牙有延迟。
-    // setTimeout(function() {
-    //   console.log(this.route, 'onShow', 'BLE has:', that.data.openBle, 'name:', that.data.name, '_result:', result)
-
-    //   if (that.data.name != null && that.data.mac != null && result) {
-    //     autoName = that.data.name;
-    //   }
-
-    //   // if (that.data.openBle) {
-    //   //   wx.startPullDownRefresh({})
-    //   // } else {
-    //   wx.onBluetoothAdapterStateChange(function(res) { //会一直监听改变一次发送一次
-    //     console.log('检测蓝牙状态：', res.available, res.discovering)
-    //     if (that.data.openBle && !res.available) {
-    //       that.setData({
-    //         openBle: false
-    //       })
-    //       wx.showLoading({
-    //         title: '请打开蓝牙重试',
-    //         mask: !that.data.debug,
-    //       })
-    //       return;
-    //     }
-
-    //     if (!that.data.openBle && res.available) {
-    //       that.setData({
-    //         openBle: true
-    //       })
-
-    //         wx.startPullDownRefresh({})
-    //     }
-    //   })
-    //   // }
-    // }, 500)
-
+      })
+    }, 500)
   },
 
 
@@ -224,12 +247,19 @@ Page({
    */
   searchDevice: function() {
     var that = this
-    //清空当前列表
+    //清空当前列表15249645473
     that.setData({
       mList: [{}]
     })
 
-    console.log("搜索设备");
+    // wx.closeBluetoothAdapter({
+    //   success: function(res) {
+    //     console.log('关闭')
+    //   }
+    // });
+
+    // wx.openBluetoothAdapter({
+    //   success: function(res) {
     // wx.hideLoading()
     wx.startBluetoothDevicesDiscovery({
       allowDuplicatesKey: false,
@@ -237,7 +267,7 @@ Page({
         console.log('打开扫描开始:', res)
 
         wx.onBluetoothDeviceFound(function(res) {
-          console.log('发现设备', res)
+          console.log('发现:', res.devices.localName, res)
           // var ds = that.data.mList
           // var temp = {
           //   name: res.devices[0].name,
@@ -254,7 +284,7 @@ Page({
       }
     })
 
-    //3秒后关闭扫描
+    //5秒后关闭扫描
     clearTimeout(num) //只需要一个定时器存在
     num = setTimeout(function() {
       wx.stopBluetoothDevicesDiscovery({
@@ -265,14 +295,21 @@ Page({
               console.log('所有设备', res)
               for (var i = 0; i < res.devices.length; i++) {
                 var ds = that.data.mList
-                if ((res.devices[i].name.indexOf('t') == -1
-                    /*&&res.devices[i].name.indexOf('BLE') == -1*/
-                  ) || res.devices[i].name.length > 4) { //过滤不符合蓝牙(不包含T 或者长度大于4)
-                  continue;
+                if (res.devices[i].localName != null) {
+                  if ((res.devices[i].localName.indexOf('t') == -1
+                      /*&&res.devices[i].name.indexOf('BLE') == -1*/
+                    ) || res.devices[i].localName.length > 6) { //过滤不符合蓝牙(不包含T 或者长度大于4)
+                    continue;
+                  }
+                } else {
+                  continue; //无名的过滤 
                 }
-                console.log("name SIze:", res.devices[i].name.length)
+
+                console.log("name SIze:", res.devices[i].localName.length);
+                var tname = res.devices[i].localName;
+                tname = tname.substring(0, 4);
                 var temp = {
-                  name: res.devices[i].name,
+                  name: tname,
                   mac: res.devices[i].deviceId
                 }
                 ds.push(temp)
@@ -294,7 +331,7 @@ Page({
               wx.stopPullDownRefresh(); //停止当前页面的下拉刷新
               wx.hideNavigationBarLoading(); //加载动画结束
               wx.hideLoading();
-              console.log('扫描结果：length:', that.data.mList, '可能连接名：', autoName)
+              console.log('扫描结果：length:', that.data.mList)
               if (that.data.mList.length <= 1) {
                 console.log('没有扫描到')
                 that.setData({
@@ -308,8 +345,11 @@ Page({
           })
         },
       })
-    }, 5000)
+    }, 8000)
+    //   },
+    // })
 
+    console.log("搜索设备");
   },
 
   /**
@@ -319,17 +359,31 @@ Page({
   /**
    * 生命周期函数--监听页面卸载
    */
-  onUnload: function() {},
+  onUnload: function() {
+    wx.closeBLEConnection({
+      deviceId: jmac,
+      success: function(res) {
+        console.log('断开')
+      },
+    })
+    wx.closeBluetoothAdapter({
+      success: function(res) {
+        console.log('关闭')
+      },
+    })
+  },
 
   /**
    * 页面相关事件处理函数--监听用户下拉动作
    */
   onPullDownRefresh: function() {
+    var that = this;
     if (!this.data.openBle) {
       wx.stopPullDownRefresh(); //停止当前页面的下拉刷新
       wx.hideNavigationBarLoading(); //加载动画结束
       return;
     }
+    console.log('下拉刷新')
 
     wx.closeBLEConnection({
       deviceId: jmac,
@@ -348,25 +402,33 @@ Page({
       },
     })
 
-
-    console.log('下拉刷新')
-    wx.showLoading({
-      title: '搜索设备中',
-      mask: !this.data.debug,
-    })
     wx.showNavigationBarLoading(); //加载动画开始
 
-    var time = setTimeout(function() {
-      wx.stopPullDownRefresh(); //停止当前页面的下拉刷新
-      wx.hideNavigationBarLoading(); //加载动画结束
-      wx.hideLoading();
-    }, 10000)
-
-    this.setData({
-      timeOut: time,
+    wx.showLoading({
+      title: '设备初始化中',
+      mask: !that.data.debug,
     })
 
-    this.searchDevice()
+    setTimeout(function() {
+      wx.showLoading({
+        title: '搜索设备中',
+        mask: !that.data.debug,
+      })
+
+
+      that.searchDevice()
+      var time = setTimeout(function () {
+        wx.stopPullDownRefresh(); //停止当前页面的下拉刷新
+        wx.hideNavigationBarLoading(); //加载动画结束
+        wx.hideLoading();
+      }, 10000);
+
+      that.setData({
+        timeOut: time,
+      })
+
+    }, 6000);
+
   },
 
   /**

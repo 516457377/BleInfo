@@ -31,8 +31,8 @@ Page({
     eq7: 0,
     listen: false, //聆听位
     //版本相关
-    dsp:"", 
-    dsp2: "/APP:1.3.0",
+    dsp: "",
+    dsp2: "/APP:1.3.2",
     time: 0,
     cKnum: 0,
     //验证消息
@@ -56,7 +56,7 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function(options) {
-    
+
     var that = this;
     mac = options.mac;
     name = options.name;
@@ -81,8 +81,7 @@ Page({
   /**
    * 生命周期函数--监听页面显示
    */
-  onShow: function() {
-  },
+  onShow: function() {},
 
   /**
    * 生命周期函数--监听页面隐藏
@@ -93,11 +92,11 @@ Page({
    * 生命周期函数--监听页面卸载
    */
   onUnload: function() {
-    
+
     var that = this;
     console.log('Unload:退出');
     this.setData({
-      onback : true,
+      onback: true,
     })
     wx.closeBLEConnection({
       deviceId: mac,
@@ -155,14 +154,14 @@ Page({
     var that = this;
     console.log("消息打印", this.data.cKnum)
 
-    if (that.data.cKnum >= 8){
+    if (that.data.cKnum >= 8) {
       wx.showModal({
         title: '版本信息',
         content: that.data.dsp + that.data.dsp2,
         showCancel: false,
         confirmColor: '#007aff',
-        success: function () {
-          
+        success: function() {
+
         }
       });
       that.setData({
@@ -171,7 +170,7 @@ Page({
       return;
     }
 
-    if(that.data.time != 0){//存在延时,先取消之前的
+    if (that.data.time != 0) { //存在延时,先取消之前的
       clearTimeout(that.data.time);
     }
 
@@ -184,7 +183,7 @@ Page({
 
     this.setData({
       time: temp,
-      cKnum: that.data.cKnum+1,
+      cKnum: that.data.cKnum + 1,
     })
 
   },
@@ -433,14 +432,14 @@ Page({
     // })
   },
   /*--------------------------------------------自定调用方法-------------------------------------------------*/
-  connectIng(){
+  connectIng() {
     var that = this;
     console.log('多次连接', that.data.connectNum);
-    if (that.data.connectNum > 60){
+    if (that.data.connectNum > 60) {
       return;
     }
     that.setData({
-      connectNum:that.data.connectNum+1,
+      connectNum: that.data.connectNum + 1,
     })
     wx.createBLEConnection({
       deviceId: mac,
@@ -450,7 +449,7 @@ Page({
           serviceId: that.data.UUID_SERVER,
           characteristicId: that.data.UUID_WRITE,
           value: that.getByte(new Int8Array([0x00])).buffer,
-          success: function (res) {
+          success: function(res) {
             console.log('发送成功', res)
           },
           fail(res) {
@@ -463,28 +462,30 @@ Page({
                   serviceId: that.data.UUID_SERVER,
                   characteristicId: that.data.UUID_WRITE,
                   value: that.getByte(new Int8Array([0x00])).buffer,
-                  success: function (res) {
+                  success: function(res) {
                     console.log('获取发送成功', res)
-                  },fail: function(res){
+                  },
+                  fail: function(res) {
                     console.log(res, "发送失败")
                     that.connectIng();
                   }
-                  })
-              },fail: function(res){
+                })
+              },
+              fail: function(res) {
                 wx.closeBLEConnection({
                   deviceId: mac,
-                  success: function (res) {
+                  success: function(res) {
                     console.log(res, "获取失败")
                     that.connectIng();
                   },
                 })
               }
             })
-            
+
           }
         })
       },
-      fail: function(res){
+      fail: function(res) {
         console.log(res, "连接失败")
         that.connectIng();
       }
@@ -522,73 +523,73 @@ Page({
 
 
   },
-  onSendSuccess:function(r){
-    that.setData({
-      connect: true
-    })
-    wx.setNavigationBarTitle({
-      title: name + '(已连接)',
-    })
-    wx.hideLoading()
-    wx.onBLEConnectionStateChange(function (res) { //蓝牙状态监听
-      console.log('连接状态', res.connected, "connect:", that.data.connect)
+  // onSendSuccess:function(r){
+  //   that.setData({
+  //     connect: true
+  //   })
+  //   wx.setNavigationBarTitle({
+  //     title: name + '(已连接)',
+  //   })
+  //   wx.hideLoading()
+  //   wx.onBLEConnectionStateChange(function (res) { //蓝牙状态监听
+  //     console.log('连接状态', res.connected, "connect:", that.data.connect)
 
-      if (!res.connected && that.data.connect) {
-        //蓝牙断开后回到首页
-        console.log('监听跳转')
-        if (!that.data.onback) {
-          //重连
-          wx.showLoading({
-            title: '请稍后',
-            mask: !that.data.debug,
-          })
-          that.connectBle();
+  //     if (!res.connected && that.data.connect) {
+  //       //蓝牙断开后回到首页
+  //       console.log('监听跳转')
+  //       if (!that.data.onback) {
+  //         //重连
+  //         wx.showLoading({
+  //           title: '请稍后',
+  //           mask: !that.data.debug,
+  //         })
+  //         that.connectBle();
 
-        }
-        // wx.reLaunch({
-        //   url: '../start/start?result=true',
-        // })
-      }
-    })
+  //       }
+  //       // wx.reLaunch({
+  //       //   url: '../start/start?result=true',
+  //       // })
+  //     }
+  //   })
 
-    wx.notifyBLECharacteristicValueChange({
-      deviceId: mac,
-      serviceId: that.data.UUID_SERVER,
-      characteristicId: that.data.UUID_READ,
-      state: true,
-      success: function (res) {
-        console.log('监听开启成功')
-        //连接成功发送请求
-        // const sound = new Int8Array(3);
-        // sound[0] = 121;
-        // sound[1] = -121;
-        // sound[2] = 124;
-        // that.wirte(sound)
-        //获取回调消息
-        that.getCallBack();
+  //   wx.notifyBLECharacteristicValueChange({
+  //     deviceId: mac,
+  //     serviceId: that.data.UUID_SERVER,
+  //     characteristicId: that.data.UUID_READ,
+  //     state: true,
+  //     success: function (res) {
+  //       console.log('监听开启成功')
+  //       //连接成功发送请求
+  //       // const sound = new Int8Array(3);
+  //       // sound[0] = 121;
+  //       // sound[1] = -121;
+  //       // sound[2] = 124;
+  //       // that.wirte(sound)
+  //       //获取回调消息
+  //       that.getCallBack();
 
-        wx.onBLECharacteristicValueChange(function (res) {
-          console.log('###收到消息:', res);
-          var v = res.value;
-          var array = new Int8Array(v);
+  //       wx.onBLECharacteristicValueChange(function (res) {
+  //         console.log('###收到消息:', res);
+  //         var v = res.value;
+  //         var array = new Int8Array(v);
 
-          // that.setData({
-          //   slider: array[0]
-          // })
-          console.log(array)
-          that.setState(array);
-        })
-      },
-    })
+  //         // that.setData({
+  //         //   slider: array[0]
+  //         // })
+  //         console.log(array)
+  //         that.setState(array);
+  //       })
+  //     },
+  //   })
 
-  },
+  // },
   /**
    * 蓝牙连接成功,二级连接获取server
    */
   onConnectOK: function(res) {
     var that = this;
     console.log('蓝牙连接成功', res)
-    
+
     // wx.setStorage({
     //   key: '',
     //   data: '',
@@ -614,7 +615,7 @@ Page({
           if (!res.connected && that.data.connect) {
             //蓝牙断开后回到首页
             console.log('监听跳转')
-            if(!that.data.onback){
+            if (!that.data.onback) {
               //重连
               wx.showLoading({
                 title: '请稍后',
@@ -682,37 +683,44 @@ Page({
         })
 
       }
-    })
+    });
 
-    wx.notifyBLECharacteristicValueChange({
-      deviceId: mac,
-      serviceId: that.data.UUID_SERVER,
-      characteristicId: that.data.UUID_READ,
-      state: true,
-      success: function(res) {
-        console.log('监听开启成功')
-        //连接成功发送请求
-        // const sound = new Int8Array(3);
-        // sound[0] = 121;
-        // sound[1] = -121;
-        // sound[2] = 124;
-        // that.wirte(sound)
-        //获取回调消息
-        that.getCallBack();
+    console.log('执行监听获取');
+    setTimeout(function() {
+      wx.notifyBLECharacteristicValueChange({
+        deviceId: mac,
+        serviceId: that.data.UUID_SERVER,
+        characteristicId: that.data.UUID_READ,
+        state: true,
+        success: function(res) {
+          console.log('监听开启成功')
+          //连接成功发送请求
+          // const sound = new Int8Array(3);
+          // sound[0] = 121;
+          // sound[1] = -121;
+          // sound[2] = 124;
+          // that.wirte(sound)
+          //获取回调消息
+          that.getCallBack();
 
-        wx.onBLECharacteristicValueChange(function(res) {
-          console.log('###收到消息:', res);
-          var v = res.value;
-          var array = new Int8Array(v);
+          wx.onBLECharacteristicValueChange(function(res) {
+            console.log('###收到消息:', res);
+            var v = res.value;
+            var array = new Int8Array(v);
 
-          // that.setData({
-          //   slider: array[0]
-          // })
-          console.log(array)
-          that.setState(array);
-        })
-      },
-    })
+            // that.setData({
+            //   slider: array[0]
+            // })
+            console.log(array)
+            that.setState(array);
+          })
+        },
+        fail: function(res) {
+          console.log('监听开启失败', res);
+        }
+      })
+    }, 500);
+
   },
   /**蓝牙连接失败*/
   onConnectNO: function(res) {
@@ -823,19 +831,19 @@ Page({
       if (data.length == that.data.debug ? 16 : 17) {
         that.setData({
           listen: data[15] == 0x00 ? false : true,
-          dsp: 'DSP:'+data[13] + "." + data[14],
+          dsp: 'DSP:' + data[13] + "." + data[14],
         })
       }
     }
   },
   /**循环获取状态，若没有获取到回调数据一直发送*/
-  getCallBack(){
+  getCallBack() {
     var that = this;
-    if(!this.data.callBack){
+    if (!this.data.callBack) {
       that.wirte(that.getByte(new Int8Array([0x01, 0x01])));
-      setTimeout(function () {
-        that.getCallBack();//1秒后再次循环
-      },1000);
+      setTimeout(function() {
+        that.getCallBack(); //1秒后再次循环
+      }, 1000);
 
     }
   },
